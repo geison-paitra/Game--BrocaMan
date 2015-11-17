@@ -4,18 +4,18 @@ using System.Collections;
 public class ScriptBroca : MonoBehaviour
 {
 
-    public Rigidbody2D          rigidbody;                          //"Corpo" do personagem
-    public Transform            checkGround;                        //Checa se está no chão
-    private Animator            anim;                               //Controle de animação
-    public LayerMask            whatIsGround;                       //Verifica o que é chão
-    public float                moveSpeed;                          //Velocidade de movimento maxima 
-    public float                jumpHeight;                         //Autura do pulo
-    private CircleCollider2D    colider;                            //Colider do player
-    private float               movimento;                          //Pega a diração do eixo do personagem
-    private bool                isWalking = false;                  //Está caminhando?
-    private bool                isOnTheFloor = true;                //Está pisando no chão?
-    private bool                isJumping = false;                  //Está Pulando?
-    private bool                running = false;                    //Está correndo?
+    public Rigidbody2D rigidbody;                          //"Corpo" do personagem
+    public Transform checkGround;                        //Checa se está no chão
+    private Animator anim;                               //Controle de animação
+    public LayerMask whatIsGround;                       //Verifica o que é chão
+    public float moveSpeed;                          //Velocidade de movimento maxima 
+    public float jumpHeight;                         //Autura do pulo
+    private CircleCollider2D colider;                            //Colider do player
+    private float movimento;                          //Pega a diração do eixo do personagem
+    private bool isWalking = false;                  //Está caminhando?
+    private bool isOnTheFloor = true;                //Está pisando no chão?
+    private bool isJumping = false;                  //Está Pulando?
+    private bool running = false;                    //Está correndo?
 
     void Start()
     {
@@ -30,14 +30,34 @@ public class ScriptBroca : MonoBehaviour
     void FixedUpdate()
     {
 
+
         isOnTheFloor = Physics2D.OverlapCircle(checkGround.position, 0.3f, whatIsGround); // verifica se está tocando no chão
-        isJumping = Input.GetButtonDown("Jump") && isOnTheFloor && !running ? Jump() : false; // Verifica se apertou o botã de pulo
+
+        if (Input.GetButtonDown("Jump") && isOnTheFloor && !running && !isJumping)// Verifica se apertou o botã de pulo
+        {
+            isJumping = true;
+            Jump();
+        }
+
+
+        if (isOnTheFloor && isJumping) // se tocou o chão e estava na animação de jumping vola pra animação Idle
+        {
+            isJumping = false;
+            anim.SetBool("isJumping", false);
+
+        }
+        else if (isJumping)
+        {
+            anim.SetBool("isJumping", true);
+        }
+
 
         if (Input.GetButton("Horizontal")) //Verifica se está apertando dir ou esq
         {
-            movimento = Input.GetAxis("Horizontal");
+            movimento = Input.GetAxis("Horizontal"); //pegar a movimentação do eixo horizontal (x)
 
-            isWalking = isOnTheFloor ? true : false;
+            isWalking = isOnTheFloor ? true : false; // Está andando? Está se estiver pisando no chão
+
 
             if (Input.GetKeyDown(KeyCode.LeftShift) && isOnTheFloor && !running) //Corrida
             {
@@ -50,18 +70,19 @@ public class ScriptBroca : MonoBehaviour
                 moveSpeed -= 2;
             }
 
-            if (Input.GetKey("left") || Input.GetKey("a"))
+            if (Input.GetKey("left") || Input.GetKey("a")) //Esquerda
             {
                 rigidbody.velocity = GetComponent<Rigidbody2D>().velocity = new Vector3(moveSpeed * movimento, 0, 0);
+                if (isJumping) anim.SetBool("isJumping", false); //Clicou um direcional no ar? Sai da animação de pulo
                 FlipLeft();
 
             }
-            if (Input.GetKey("right") || Input.GetKey("d"))
+            else if (Input.GetKey("right") || Input.GetKey("d")) // Direita
             {
                 rigidbody.velocity = GetComponent<Rigidbody2D>().velocity = new Vector3(moveSpeed * movimento, 0, 0);
+                if (isJumping) anim.SetBool("isJumping", false); //Clicou um direcional no ar? Sai da animação de pulo
                 FlipRight();
             }
-
 
             anim.SetBool("isWalking", isWalking);
         }
@@ -75,7 +96,7 @@ public class ScriptBroca : MonoBehaviour
         else
         {
             anim.SetBool("isWalking", false);
-        }
+        }  
 
     }
 
@@ -92,6 +113,8 @@ public class ScriptBroca : MonoBehaviour
     private bool Jump()
     {
         anim.SetBool("isWalking", false);
+        anim.SetBool("isJumping", true);
+        isOnTheFloor = false;
         rigidbody.AddForce(new Vector2(0, jumpHeight));
         return true;
     }
