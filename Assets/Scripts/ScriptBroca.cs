@@ -46,10 +46,6 @@ public class ScriptBroca : MonoBehaviour
             anim.SetBool("isJumping", false);
 
         }
-        else if (isJumping)
-        {
-            anim.SetBool("isJumping", true);
-        }
 
 
         if (Input.GetButton("Horizontal")) //Verifica se está apertando dir ou esq
