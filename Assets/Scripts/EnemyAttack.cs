@@ -71,4 +71,12 @@ public class EnemyAttack : MonoBehaviour
         rigidbody.transform.localScale = new Vector3(-1f, 1f, 1f);
         return false;
     }
+
+    /// <summary>
+    /// retorna true se estiver indo para a esquerda
+    /// </summary>
+    public bool GetPosition()
+    {
+        return left;
+    }
 }
